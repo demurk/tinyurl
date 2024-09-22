@@ -12,7 +12,8 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 	}
 	fullUrlBytes, err := io.ReadAll(req.Body)
 	if err != nil {
-		panic(err)
+		http.Error(res, "Couldn't read request body", http.StatusInternalServerError)
+		return
 	}
 	shortUrl, err := setFullUrl(string(fullUrlBytes))
 	if err != nil {
@@ -28,7 +29,7 @@ func idPage(res http.ResponseWriter, req *http.Request) {
 	shortUrl := req.PathValue("id")
 	fullUrl, err := getFullUrl(shortUrl)
 	if err != nil {
-		http.Error(res, "Url doesnt exists", http.StatusBadRequest)
+		http.Error(res, "Url doesnt exists", http.StatusNotFound)
 		return
 	}
 	res.Header().Set("Location", "text/plain")
