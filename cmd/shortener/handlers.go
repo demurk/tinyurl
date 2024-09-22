@@ -10,28 +10,28 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
 		return
 	}
-	fullUrlBytes, err := io.ReadAll(req.Body)
+	fullURLBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(res, "Couldn't read request body", http.StatusInternalServerError)
 		return
 	}
-	shortUrl, err := setFullUrl(string(fullUrlBytes))
+	shortURLId, err := setFullURL(string(fullURLBytes))
 	if err != nil {
 		http.Error(res, "Couldn't create short url, try again", http.StatusInternalServerError)
 		return
 	}
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte(shortUrl))
+	res.Write([]byte("http://localhost:8080/" + shortURLId))
 }
 
 func idPage(res http.ResponseWriter, req *http.Request) {
-	shortUrl := req.PathValue("id")
-	fullUrl, err := getFullUrl(shortUrl)
+	shortURL := req.PathValue("id")
+	fullURL, err := getFullURL(shortURL)
 	if err != nil {
 		http.Error(res, "Url doesnt exists", http.StatusNotFound)
 		return
 	}
 	res.Header().Set("Location", "text/plain")
-	http.Redirect(res, req, fullUrl, http.StatusTemporaryRedirect)
+	http.Redirect(res, req, fullURL, http.StatusTemporaryRedirect)
 }
