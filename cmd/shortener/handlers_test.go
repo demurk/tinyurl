@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const serverUrl = "http://localhost:8080/"
+const serverURL = "http://localhost:8080/"
 
 func TestShortage(t *testing.T) {
 	testCases := []struct {
@@ -38,7 +38,7 @@ func TestShortage(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			postRequest := httptest.NewRequest(http.MethodPost, serverUrl, strings.NewReader(tc.fullURL))
+			postRequest := httptest.NewRequest(http.MethodPost, serverURL, strings.NewReader(tc.fullURL))
 			w := httptest.NewRecorder()
 			postHandler := http.HandlerFunc(postPage)
 			postHandler(w, postRequest)
@@ -52,14 +52,15 @@ func TestShortage(t *testing.T) {
 			require.NoError(t, err)
 			shortURLString := string(shortURLBytes)
 
-			assert.Equal(t, serverUrl+tc.shortURL, shortURLString)
+			assert.Equal(t, serverURL+tc.shortURL, shortURLString)
 
-			idRequest := httptest.NewRequest(http.MethodGet, serverUrl, nil)
+			idRequest := httptest.NewRequest(http.MethodGet, serverURL, nil)
 			idRequest.SetPathValue("id", tc.shortURL)
 			ww := httptest.NewRecorder()
 			idHandler := http.HandlerFunc(idPage)
 			idHandler(ww, idRequest)
 			idResult := ww.Result()
+			defer idResult.Body.Close()
 
 			assert.Equal(t, tc.fullURL, idResult.Header.Get("Location"))
 			assert.Equal(t, idResult.StatusCode, http.StatusTemporaryRedirect)
