@@ -9,6 +9,9 @@ import (
 
 func main() {
 	r := chi.NewRouter()
+	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
+		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
+	})
 	r.Use(middleware.Logger)
 	r.Post("/", postPage)
 	r.Get("/{id}", idPage)
