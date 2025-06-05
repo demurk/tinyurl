@@ -6,10 +6,6 @@ import (
 )
 
 func postPage(res http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(res, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
-		return
-	}
 	fullURLBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(res, "Couldn't read request body", http.StatusInternalServerError)
