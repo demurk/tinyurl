@@ -63,7 +63,7 @@ func TestShortage(t *testing.T) {
 			defer idResult.Body.Close()
 
 			assert.Equal(t, tc.fullURL, idResult.Header.Get("Location"))
-			assert.Equal(t, idResult.StatusCode, http.StatusTemporaryRedirect)
+			assert.Equal(t, http.StatusTemporaryRedirect, idResult.StatusCode)
 		})
 	}
 }
