@@ -3,6 +3,8 @@ package main
 import (
 	"io"
 	"net/http"
+
+	"github.com/demurk/tinyurl/cmd/shortener/config"
 )
 
 func postPage(res http.ResponseWriter, req *http.Request) {
@@ -18,7 +20,7 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 	shortURLId := setFullURL(string(fullURLBytes))
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte("http://localhost:8080/" + shortURLId))
+	res.Write([]byte(*config.ResultURL + shortURLId))
 }
 
 func idPage(res http.ResponseWriter, req *http.Request) {

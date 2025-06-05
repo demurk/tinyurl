@@ -7,13 +7,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/demurk/tinyurl/cmd/shortener/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const serverURL = "http://localhost:8080/"
-
 func TestShortage(t *testing.T) {
+	config.ParseFlags()
+
 	testCases := []struct {
 		name       string
 		fullURL    string
@@ -38,13 +39,13 @@ func TestShortage(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			postRequest := httptest.NewRequest(http.MethodPost, serverURL, strings.NewReader(tc.fullURL))
+			postRequest := httptest.NewRequest(http.MethodPost, *config.OriginURL, strings.NewReader(tc.fullURL))
 			w := httptest.NewRecorder()
 			postHandler := http.HandlerFunc(postPage)
 			postHandler(w, postRequest)
 			result := w.Result()
 
-			assert.Equal(t, result.StatusCode, http.StatusCreated)
+			assert.Equal(t, http.StatusCreated, result.StatusCode)
 
 			shortURLBytes, err := io.ReadAll(result.Body)
 			require.NoError(t, err)
@@ -52,9 +53,9 @@ func TestShortage(t *testing.T) {
 			require.NoError(t, err)
 			shortURLString := string(shortURLBytes)
 
-			assert.Equal(t, serverURL+tc.shortURL, shortURLString)
+			assert.Equal(t, *config.ResultURL+tc.shortURL, shortURLString)
 
-			idRequest := httptest.NewRequest(http.MethodGet, serverURL, nil)
+			idRequest := httptest.NewRequest(http.MethodGet, *config.OriginURL, nil)
 			idRequest.SetPathValue("id", tc.shortURL)
 			ww := httptest.NewRecorder()
 			idHandler := http.HandlerFunc(idPage)
