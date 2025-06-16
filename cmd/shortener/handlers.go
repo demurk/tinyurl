@@ -30,6 +30,5 @@ func idPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Url doesnt exists", http.StatusNotFound)
 		return
 	}
-	res.Header().Set("Location", "text/plain")
 	http.Redirect(res, req, fullURL, http.StatusTemporaryRedirect)
 }

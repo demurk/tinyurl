@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/demurk/tinyurl/cmd/shortener/config"
@@ -16,7 +17,7 @@ func main() {
 	})
 	r.Use(middleware.Logger)
 	r.Post("/", postPage)
-	r.Get("/{id}", idPage)
+	r.Get(fmt.Sprintf("/%s{id}", *config.BaseResultURL), idPage)
 
 	err := http.ListenAndServe(*config.OriginURL, r)
 	if err != nil {
