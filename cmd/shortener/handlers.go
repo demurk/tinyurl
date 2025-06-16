@@ -17,10 +17,11 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Couldn't read request body", http.StatusInternalServerError)
 		return
 	}
+	defer req.Body.Close()
 	shortURLId := setFullURL(string(fullURLBytes))
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte(config.ResultURL + shortURLId))
+	res.Write([]byte(*config.ResultURL + "/" + shortURLId))
 }
 
 func idPage(res http.ResponseWriter, req *http.Request) {
