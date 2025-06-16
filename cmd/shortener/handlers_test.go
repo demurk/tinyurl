@@ -53,7 +53,7 @@ func TestShortage(t *testing.T) {
 			require.NoError(t, err)
 			shortURLString := string(shortURLBytes)
 
-			assert.Equal(t, *config.ResultURL+tc.shortURL, shortURLString)
+			assert.Equal(t, config.ResultURL+tc.shortURL, shortURLString)
 
 			idRequest := httptest.NewRequest(http.MethodGet, *config.OriginURL, nil)
 			idRequest.SetPathValue("id", tc.shortURL)
