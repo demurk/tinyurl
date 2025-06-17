@@ -13,7 +13,7 @@ import (
 )
 
 func TestShortage(t *testing.T) {
-	config.ParseFlags()
+	config.Parse()
 
 	testCases := []struct {
 		name       string
@@ -58,8 +58,8 @@ func TestShortage(t *testing.T) {
 			idRequest := httptest.NewRequest(http.MethodGet, *config.OriginURL, nil)
 			idRequest.SetPathValue("id", tc.shortURL)
 			ww := httptest.NewRecorder()
-			idHandler := http.HandlerFunc(idPage)
-			idHandler(ww, idRequest)
+			getHandler := http.HandlerFunc(getPage)
+			getHandler(ww, idRequest)
 			idResult := ww.Result()
 			defer idResult.Body.Close()
 
@@ -93,13 +93,13 @@ func TestPostHandlerMethods(t *testing.T) {
 	}
 }
 
-func TestIdHandler(t *testing.T) {
+func TestGetHandler(t *testing.T) {
 	t.Run(http.MethodGet, func(t *testing.T) {
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
 		w := httptest.NewRecorder()
 
-		idHandler := http.HandlerFunc(idPage)
-		idHandler(w, request)
+		getHandler := http.HandlerFunc(getPage)
+		getHandler(w, request)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})

@@ -9,14 +9,14 @@ import (
 )
 
 func main() {
-	config.ParseFlags()
+	config.Parse()
 	r := chi.NewRouter()
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
 	})
 	r.Use(middleware.Logger)
 	r.Post("/", postPage)
-	r.Get("/{id}", idPage)
+	r.Get("/{id}", getPage)
 
 	err := http.ListenAndServe(*config.OriginURL, r)
 	if err != nil {

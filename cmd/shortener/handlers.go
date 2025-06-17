@@ -24,7 +24,7 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 	res.Write([]byte(*config.ResultURL + "/" + shortURLId))
 }
 
-func idPage(res http.ResponseWriter, req *http.Request) {
+func getPage(res http.ResponseWriter, req *http.Request) {
 	shortURL := req.PathValue("id")
 	fullURL, err := getFullURL(shortURL)
 	if err != nil {
