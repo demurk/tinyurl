@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -37,8 +38,12 @@ var shortenTestCases = []struct {
 	},
 }
 
-func TestShortage(t *testing.T) {
+func TestMain(m *testing.M) {
 	config.Parse()
+	os.Exit(m.Run())
+}
+
+func TestShortage(t *testing.T) {
 	for _, tc := range shortenTestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			postRequest := httptest.NewRequest(http.MethodPost, *config.OriginURL, strings.NewReader(tc.fullURL))
@@ -72,7 +77,6 @@ func TestShortage(t *testing.T) {
 }
 
 func TestShortageJSON(t *testing.T) {
-	config.Parse()
 	for _, tc := range shortenTestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			responseData := PostRequestData{URL: tc.fullURL}
