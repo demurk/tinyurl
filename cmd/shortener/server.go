@@ -28,6 +28,8 @@ func main() {
 	r.Post("/", postPage)
 	r.Get("/{id}", getPage)
 
+	r.Post("/api/shorten", postPageJSON)
+
 	err = http.ListenAndServe(*config.OriginURL, r)
 	if err != nil {
 		panic(err)
