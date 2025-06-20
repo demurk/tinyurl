@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"bytes"
 	"net/http"
 	"time"
 
@@ -13,8 +12,6 @@ func ZapLogger(logger *zap.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rw := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
-			var responseBody bytes.Buffer
-			rw.Tee(&responseBody)
 
 			start := time.Now()
 			next.ServeHTTP(rw, r)
