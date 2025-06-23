@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/demurk/tinyurl/cmd/shortener/config"
+	"github.com/demurk/tinyurl/internal/app/middleware/compression"
 	"github.com/demurk/tinyurl/internal/app/middleware/logger"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -21,6 +22,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(logger.ZapLogger(zapLogger))
+	r.Use(compression.GZIP)
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
 	})
