@@ -18,6 +18,13 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer req.Body.Close()
+
+	fullURL := string(fullURLBytes)
+	if !IsValidURL(fullURL) {
+		http.Error(res, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
 	shortURLId := setFullURL(string(fullURLBytes))
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)

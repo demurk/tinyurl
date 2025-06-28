@@ -128,7 +128,7 @@ func TestPostHandlerMethods(t *testing.T) {
 	for _, tc := range testCases {
 		for _, URL := range []string{"/", "/api/shorten"} {
 			t.Run(tc.method, func(t *testing.T) {
-				request := httptest.NewRequest(tc.method, URL, nil)
+				request := httptest.NewRequest(tc.method, URL, strings.NewReader("https://github.com/demurk/tinyurl"))
 				w := httptest.NewRecorder()
 
 				postHandler := http.HandlerFunc(postPage)
@@ -138,6 +138,16 @@ func TestPostHandlerMethods(t *testing.T) {
 			})
 		}
 	}
+}
+
+func TestInvalidURL(t *testing.T) {
+	request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("not an url"))
+	w := httptest.NewRecorder()
+
+	postHandler := http.HandlerFunc(postPage)
+	postHandler(w, request)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code, "Invalid URL")
 }
 
 func TestGetHandler(t *testing.T) {
