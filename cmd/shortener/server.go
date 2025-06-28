@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/demurk/tinyurl/internal/app/middleware/compression"
-	middlewareLogger "github.com/demurk/tinyurl/internal/app/middleware/logger"
+	middlewarelogger "github.com/demurk/tinyurl/internal/app/middleware/logger"
 	"github.com/demurk/tinyurl/internal/config"
 	"github.com/demurk/tinyurl/internal/db"
 	"github.com/demurk/tinyurl/internal/logger"
@@ -24,7 +24,7 @@ func main() {
 
 	r := chi.NewRouter()
 
-	r.Use(middlewareLogger.ConnectZapLogger(zapLogger))
+	r.Use(middlewarelogger.ConnectZapLogger(zapLogger))
 	r.Use(compression.GZIP)
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
