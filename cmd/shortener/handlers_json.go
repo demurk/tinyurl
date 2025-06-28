@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
+	"github.com/demurk/tinyurl/internal/config"
 )
 
 type PostRequestData struct {

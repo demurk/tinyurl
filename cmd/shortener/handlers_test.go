@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
+	"github.com/demurk/tinyurl/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

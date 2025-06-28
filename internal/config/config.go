@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	OriginURL *string
-	ResultURL *string
+	OriginURL       *string
+	ResultURL       *string
+	DBConnectionURL *string
 )
 
 func Parse() {
@@ -21,6 +22,12 @@ func Parse() {
 	resultURLEnv, exists := os.LookupEnv("BASE_URL")
 	if exists {
 		ResultURL = &resultURLEnv
+	}
+
+	DBConnectionURL = flag.String("d", "host='127.0.0.1' port='5432' user='postgres' password='password' dbname='tinyurl' sslmode=disable", "Database connection URL")
+	dbConnectionURLEnv, exists := os.LookupEnv("DATABASE_DSN")
+	if exists {
+		DBConnectionURL = &dbConnectionURLEnv
 	}
 
 	flag.Parse()
