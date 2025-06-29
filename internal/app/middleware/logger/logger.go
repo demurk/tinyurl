@@ -1,4 +1,4 @@
-package middlewarelogger
+package middleware_logger
 
 import (
 	"net/http"
