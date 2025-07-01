@@ -45,19 +45,19 @@ func dbSetFullURL(fullURL string) (string, error) {
 	return shortURL, nil
 }
 
-func dbSetFullURLBatch(urlMap []types.BatchJsonPostRequestData) ([]types.BatchJsonPostResponseData, error) {
+func dbSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.BatchJsonPostResponseData, error) {
 	batchSize := 500
 	conn := db.GetConnection()
 	var returnValues []types.BatchJsonPostResponseData
 
 	tx, _ := conn.Begin()
 	var err error
-	for i := 0; i < len(urlMap); i += batchSize {
+	for i := 0; i < len(urlSlice); i += batchSize {
 		endMarker := i + batchSize
-		if endMarker > len(urlMap) {
-			endMarker = len(urlMap)
+		if endMarker > len(urlSlice) {
+			endMarker = len(urlSlice)
 		}
-		batch := urlMap[i:endMarker]
+		batch := urlSlice[i:endMarker]
 
 		query := "INSERT INTO urls (short_url, full_url) VALUES "
 

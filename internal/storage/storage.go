@@ -24,14 +24,16 @@ func Initialize() {
 		}
 	} else if *config.FileStoragePath != "" {
 		storage = StorageStruct{
-			Get: mGetFullURL,
-			Set: dSetFullURL,
+			Get:      mGetFullURL,
+			Set:      dSetFullURL,
+			SetBatch: dSetFullURLBatch,
 		}
 		RestoreURLsFromFile()
 	} else {
 		storage = StorageStruct{
-			Get: mGetFullURL,
-			Set: mSetFullURL,
+			Get:      mGetFullURL,
+			Set:      mSetFullURL,
+			SetBatch: mSetFullURLBatch,
 		}
 	}
 }

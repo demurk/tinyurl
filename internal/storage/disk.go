@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/types"
 )
 
 var lastUUID = 0
@@ -65,4 +66,36 @@ func dSetFullURL(fullURL string) (string, error) {
 
 	lastUUID += 1
 	return shortURL, nil
+}
+
+func dSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.BatchJsonPostResponseData, error) {
+	var returnValues []types.BatchJsonPostResponseData
+	file, err := os.OpenFile(*config.FileStoragePath, os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	for _, url := range urlSlice {
+		shortURL := makeShortURL(url.OriginalURL)
+		jsonData, err := json.Marshal(
+			urlData{UUID: lastUUID, ShortURL: shortURL, OriginalURL: url.OriginalURL},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		file.Write(jsonData)
+		file.WriteString("\n")
+
+		mSetShortFullURL(shortURL, url.OriginalURL)
+		lastUUID += 1
+
+		returnValues = append(returnValues, types.BatchJsonPostResponseData{
+			CorrelationID: url.CorrelationID,
+			ShortURL:      ShortURLWithHost(shortURL),
+		})
+	}
+
+	return returnValues, nil
 }
