@@ -41,6 +41,7 @@ var shortenTestCases = []struct {
 
 func TestMain(m *testing.M) {
 	config.Parse()
+	os.Truncate(*config.FileStoragePath, 0)
 	storage.Initialize()
 	os.Exit(m.Run())
 }

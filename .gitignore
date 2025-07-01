@@ -26,3 +26,4 @@ vendor/
 shortenertest*
 client
 cmd/shortener/go.mod
+urls_storage.jsonl

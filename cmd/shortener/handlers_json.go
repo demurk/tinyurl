@@ -35,6 +35,11 @@ func postPageJSON(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if !IsValidURL(r.URL) {
+		http.Error(res, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
 	urlStorage := storage.Get()
 	var shortURL string
 	shortURL, err = urlStorage.Set(r.URL)

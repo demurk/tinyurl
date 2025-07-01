@@ -61,6 +61,8 @@ func dSetFullURL(fullURL string) (string, error) {
 	file.Write(jsonData)
 	file.WriteString("\n")
 
+	mSetShortFullURL(shortURL, fullURL)
+
 	lastUUID += 1
 	return shortURL, nil
 }

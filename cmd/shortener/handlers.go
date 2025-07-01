@@ -20,9 +20,15 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
+	fullURL := string(fullURLBytes)
+	if !IsValidURL(fullURL) {
+		http.Error(res, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
 	urlStorage := storage.Get()
 	var shortURL string
-	shortURL, err = urlStorage.Set(string(fullURLBytes))
+	shortURL, err = urlStorage.Set(fullURL)
 	if err != nil {
 		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
 		return
