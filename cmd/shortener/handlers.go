@@ -4,7 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
+	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/storage"
 )
 
 func postPage(res http.ResponseWriter, req *http.Request) {
@@ -18,17 +19,26 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer req.Body.Close()
-	shortURLId := setFullURL(string(fullURLBytes))
+
+	urlStorage := storage.Get()
+	var shortURL string
+	shortURL, err = urlStorage.Set(string(fullURLBytes))
+	if err != nil {
+		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
+		return
+	}
+
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte(*config.ResultURL + "/" + shortURLId))
+	res.Write([]byte(*config.ResultURL + "/" + shortURL))
 }
 
 func getPage(res http.ResponseWriter, req *http.Request) {
 	shortURL := req.PathValue("id")
-	fullURL, err := getFullURL(shortURL)
+	urlStorage := storage.Get()
+	fullURL, err := urlStorage.Get(shortURL)
 	if err != nil {
-		http.Error(res, "Url doesnt exists", http.StatusNotFound)
+		http.Error(res, err.Error(), http.StatusNotFound)
 		return
 	}
 	http.Redirect(res, req, fullURL, http.StatusTemporaryRedirect)

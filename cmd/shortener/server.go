@@ -3,9 +3,10 @@ package main
 import (
 	"net/http"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
 	"github.com/demurk/tinyurl/internal/app/middleware/compression"
 	"github.com/demurk/tinyurl/internal/app/middleware/logger"
+	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
@@ -18,6 +19,8 @@ func main() {
 		panic(err)
 	}
 	defer zapLogger.Sync()
+
+	storage.Initialize()
 
 	r := chi.NewRouter()
 

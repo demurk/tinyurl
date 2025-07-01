@@ -5,7 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
+	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/storage"
 )
 
 type PostRequestData struct {
@@ -34,8 +35,15 @@ func postPageJSON(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	shortURLId := setFullURL(r.URL)
-	responseData := PostResponseData{Result: *config.ResultURL + "/" + shortURLId}
+	urlStorage := storage.Get()
+	var shortURL string
+	shortURL, err = urlStorage.Set(r.URL)
+	if err != nil {
+		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
+		return
+	}
+
+	responseData := PostResponseData{Result: *config.ResultURL + "/" + shortURL}
 	jsonResponse, err := json.Marshal(responseData)
 	if err != nil {
 		http.Error(res, "Error marshaling response JSON", http.StatusInternalServerError)
