@@ -9,14 +9,14 @@ import (
 type StorageStruct struct {
 	Get      func(string) (string, error)
 	Set      func(string) (string, error)
-	SetBatch func([]types.BatchJsonPostRequestData) ([]types.BatchJsonPostResponseData, error)
+	SetBatch func([]types.BatchJSONPostRequestData) ([]types.BatchJSONPostResponseData, error)
 }
 
 var storage StorageStruct
 
 func Initialize() {
-	err := db.GetConnection().Ping()
-	if err == nil {
+	conn := db.GetConnection()
+	if conn != nil && conn.Ping() == nil {
 		storage = StorageStruct{
 			Get:      dbGetFullURL,
 			Set:      dbSetFullURL,

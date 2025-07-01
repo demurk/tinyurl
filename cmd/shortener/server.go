@@ -37,8 +37,8 @@ func main() {
 	r.Get("/{id}", getFullURLHandler)
 	r.Get("/ping", pingDBPage)
 
-	r.Post("/api/shorten", saveJsonURLHandler)
-	r.Post("/api/shorten/batch", saveBatchJsonURLsPage)
+	r.Post("/api/shorten", saveJSONURLHandler)
+	r.Post("/api/shorten/batch", saveBatchJSONURLsPage)
 
 	err := http.ListenAndServe(*config.OriginURL, r)
 	if err != nil {

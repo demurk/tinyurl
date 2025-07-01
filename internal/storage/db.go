@@ -45,10 +45,10 @@ func dbSetFullURL(fullURL string) (string, error) {
 	return shortURL, nil
 }
 
-func dbSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.BatchJsonPostResponseData, error) {
+func dbSetFullURLBatch(urlSlice []types.BatchJSONPostRequestData) ([]types.BatchJSONPostResponseData, error) {
 	batchSize := 500
 	conn := db.GetConnection()
-	var returnValues []types.BatchJsonPostResponseData
+	var returnValues []types.BatchJSONPostResponseData
 
 	tx, _ := conn.Begin()
 	var err error
@@ -70,7 +70,7 @@ func dbSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.Batch
 			placeholders = append(placeholders, fmt.Sprintf("($%d, $%d)", j*2+1, j*2+2))
 			values = append(values, shortURL, batch[j].OriginalURL)
 
-			returnValues = append(returnValues, types.BatchJsonPostResponseData{
+			returnValues = append(returnValues, types.BatchJSONPostResponseData{
 				CorrelationID: batch[j].CorrelationID,
 				ShortURL:      ShortURLWithHost(shortURL),
 			})

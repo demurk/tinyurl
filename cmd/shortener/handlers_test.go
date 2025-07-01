@@ -83,12 +83,12 @@ func TestShortage(t *testing.T) {
 func TestShortageJSON(t *testing.T) {
 	for _, tc := range shortenTestCases {
 		t.Run(tc.name, func(t *testing.T) {
-			responseData := types.JsonPostRequestData{URL: tc.fullURL}
+			responseData := types.JSONPostRequestData{URL: tc.fullURL}
 			jsonBody, _ := json.Marshal(responseData)
 
 			postRequest := httptest.NewRequest(http.MethodPost, *config.OriginURL, bytes.NewReader(jsonBody))
 			w := httptest.NewRecorder()
-			postHandler := http.HandlerFunc(saveJsonURLHandler)
+			postHandler := http.HandlerFunc(saveJSONURLHandler)
 			postHandler(w, postRequest)
 			result := w.Result()
 
@@ -98,7 +98,7 @@ func TestShortageJSON(t *testing.T) {
 			require.NoError(t, err)
 			err = result.Body.Close()
 			require.NoError(t, err)
-			var r types.JsonPostResponseData
+			var r types.JSONPostResponseData
 			err = json.Unmarshal(bodyBytes, &r)
 			require.NoError(t, err)
 

@@ -1,18 +1,18 @@
 package types
 
-type JsonPostRequestData struct {
+type JSONPostRequestData struct {
 	URL string `json:"url"`
 }
-type JsonPostResponseData struct {
+type JSONPostResponseData struct {
 	Result string `json:"result"`
 }
 
-type BatchJsonPostRequestData struct {
+type BatchJSONPostRequestData struct {
 	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
 }
 
-type BatchJsonPostResponseData struct {
+type BatchJSONPostResponseData struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
 }

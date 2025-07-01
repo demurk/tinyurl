@@ -68,8 +68,8 @@ func dSetFullURL(fullURL string) (string, error) {
 	return shortURL, nil
 }
 
-func dSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.BatchJsonPostResponseData, error) {
-	var returnValues []types.BatchJsonPostResponseData
+func dSetFullURLBatch(urlSlice []types.BatchJSONPostRequestData) ([]types.BatchJSONPostResponseData, error) {
+	var returnValues []types.BatchJSONPostResponseData
 	file, err := os.OpenFile(*config.FileStoragePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func dSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.BatchJ
 		mSetShortFullURL(shortURL, url.OriginalURL)
 		lastUUID += 1
 
-		returnValues = append(returnValues, types.BatchJsonPostResponseData{
+		returnValues = append(returnValues, types.BatchJSONPostResponseData{
 			CorrelationID: url.CorrelationID,
 			ShortURL:      ShortURLWithHost(shortURL),
 		})

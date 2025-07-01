@@ -9,7 +9,7 @@ import (
 	"github.com/demurk/tinyurl/internal/types"
 )
 
-func saveJsonURLHandler(res http.ResponseWriter, req *http.Request) {
+func saveJSONURLHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(res, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
 		return
@@ -21,7 +21,7 @@ func saveJsonURLHandler(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	var r types.JsonPostRequestData
+	var r types.JSONPostRequestData
 	err = json.Unmarshal(reqBytes, &r)
 	if err != nil {
 		http.Error(res, "Couldn't parse request json", http.StatusInternalServerError)
@@ -41,7 +41,7 @@ func saveJsonURLHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	responseData := types.JsonPostResponseData{Result: storage.ShortURLWithHost(shortURL)}
+	responseData := types.JSONPostResponseData{Result: storage.ShortURLWithHost(shortURL)}
 	jsonResponse, err := json.Marshal(responseData)
 	if err != nil {
 		http.Error(res, "Error marshaling response JSON", http.StatusInternalServerError)
@@ -53,7 +53,7 @@ func saveJsonURLHandler(res http.ResponseWriter, req *http.Request) {
 	res.Write(jsonResponse)
 }
 
-func saveBatchJsonURLsPage(res http.ResponseWriter, req *http.Request) {
+func saveBatchJSONURLsPage(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(res, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
 		return
@@ -65,7 +65,7 @@ func saveBatchJsonURLsPage(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	var r []types.BatchJsonPostRequestData
+	var r []types.BatchJSONPostRequestData
 	err = json.Unmarshal(reqBytes, &r)
 	if err != nil {
 		http.Error(res, "Couldn't parse request json", http.StatusInternalServerError)
@@ -73,7 +73,7 @@ func saveBatchJsonURLsPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	storage := storage.Get()
-	var result []types.BatchJsonPostResponseData
+	var result []types.BatchJSONPostResponseData
 	result, err = storage.SetBatch(r)
 	if err != nil {
 		http.Error(res, "Error storing data", http.StatusInternalServerError)

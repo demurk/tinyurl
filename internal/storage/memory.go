@@ -55,8 +55,8 @@ func mSetShortFullURL(shortURL string, fullURL string) {
 	urlsStorage.Set(shortURL, fullURL)
 }
 
-func mSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.BatchJsonPostResponseData, error) {
-	var returnValues []types.BatchJsonPostResponseData
+func mSetFullURLBatch(urlSlice []types.BatchJSONPostRequestData) ([]types.BatchJSONPostResponseData, error) {
+	var returnValues []types.BatchJSONPostResponseData
 
 	urlsStorage.mu.Lock()
 	defer urlsStorage.mu.Unlock()
@@ -65,7 +65,7 @@ func mSetFullURLBatch(urlSlice []types.BatchJsonPostRequestData) ([]types.BatchJ
 		shortURL := makeShortURL(url.OriginalURL)
 		urlsStorage.SetUnsafe(shortURL, url.OriginalURL)
 
-		returnValues = append(returnValues, types.BatchJsonPostResponseData{
+		returnValues = append(returnValues, types.BatchJSONPostResponseData{
 			CorrelationID: url.CorrelationID,
 			ShortURL:      ShortURLWithHost(shortURL),
 		})
