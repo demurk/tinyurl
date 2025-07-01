@@ -23,7 +23,7 @@ func main() {
 	conn := db.GetConnection()
 	defer conn.Close()
 
-	storage.New()
+	storage.Initialize()
 
 	r := chi.NewRouter()
 

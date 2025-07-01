@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/storage"
 	"github.com/demurk/tinyurl/internal/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,6 +42,8 @@ var shortenTestCases = []struct {
 
 func TestMain(m *testing.M) {
 	config.Parse()
+	os.Truncate(*config.FileStoragePath, 0)
+	storage.Initialize()
 	os.Exit(m.Run())
 }
 

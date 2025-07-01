@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/demurk/tinyurl/internal/config"
 	"github.com/demurk/tinyurl/internal/db"
 	"github.com/demurk/tinyurl/internal/types"
 )
@@ -13,7 +14,7 @@ type StorageStruct struct {
 
 var storage StorageStruct
 
-func New() {
+func Initialize() {
 	err := db.GetConnection().Ping()
 	if err == nil {
 		storage = StorageStruct{
@@ -21,6 +22,12 @@ func New() {
 			Set:      dbSetFullURL,
 			SetBatch: dbSetFullURLBatch,
 		}
+	} else if *config.FileStoragePath != "" {
+		storage = StorageStruct{
+			Get: mGetFullURL,
+			Set: dSetFullURL,
+		}
+		RestoreURLsFromFile()
 	} else {
 		storage = StorageStruct{
 			Get: mGetFullURL,

@@ -28,7 +28,7 @@ func saveTextURLHandler(res http.ResponseWriter, req *http.Request) {
 
 	urlStorage := storage.Get()
 	var shortURL string
-	shortURL, err = urlStorage.Set(string(fullURLBytes))
+	shortURL, err = urlStorage.Set(fullURL)
 	if err != nil {
 		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
 		return
@@ -41,10 +41,10 @@ func saveTextURLHandler(res http.ResponseWriter, req *http.Request) {
 
 func getFullURLHandler(res http.ResponseWriter, req *http.Request) {
 	shortURL := req.PathValue("id")
-	storage := storage.Get()
-	fullURL, err := storage.Get(shortURL)
+	urlStorage := storage.Get()
+	fullURL, err := urlStorage.Get(shortURL)
 	if err != nil {
-		http.Error(res, "Url doesnt exists", http.StatusNotFound)
+		http.Error(res, err.Error(), http.StatusNotFound)
 		return
 	}
 	http.Redirect(res, req, fullURL, http.StatusTemporaryRedirect)

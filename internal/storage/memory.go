@@ -44,3 +44,7 @@ func mSetFullURL(fullURL string) (string, error) {
 	urlsStorage.Set(shortURL, fullURL)
 	return shortURL, nil
 }
+
+func mSetShortFullURL(shortURL string, fullURL string) {
+	urlsStorage.Set(shortURL, fullURL)
+}
