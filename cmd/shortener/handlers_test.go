@@ -1,43 +1,53 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
+	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestShortage(t *testing.T) {
-	config.Parse()
+var shortenTestCases = []struct {
+	name       string
+	fullURL    string
+	shortURL   string
+	statusCode int
+}{
+	{
+		name:     "test shortage #1",
+		fullURL:  "https://practicum.yandex.ru/learn/go-advanced",
+		shortURL: "kpEZc4zh",
+	},
+	{
+		name:     "test shortage #2",
+		fullURL:  "https://go.dev/doc/tutorial/getting-started",
+		shortURL: "MQ4QfaXg",
+	},
+	{
+		name:     "test shortage #3",
+		fullURL:  "https://github.com/demurk/tinyurl",
+		shortURL: "NrBfyOZ7",
+	},
+}
 
-	testCases := []struct {
-		name       string
-		fullURL    string
-		shortURL   string
-		statusCode int
-	}{
-		{
-			name:     "test shortage #1",
-			fullURL:  "https://practicum.yandex.ru/learn/go-advanced",
-			shortURL: "kpEZc4zh",
-		},
-		{
-			name:     "test shortage #2",
-			fullURL:  "https://go.dev/doc/tutorial/getting-started",
-			shortURL: "MQ4QfaXg",
-		},
-		{
-			name:     "test shortage #3",
-			fullURL:  "https://github.com/demurk/tinyurl",
-			shortURL: "NrBfyOZ7",
-		},
-	}
-	for _, tc := range testCases {
+func TestMain(m *testing.M) {
+	config.Parse()
+	os.Truncate(*config.FileStoragePath, 0)
+	storage.Initialize()
+	os.Exit(m.Run())
+}
+
+func TestShortage(t *testing.T) {
+	for _, tc := range shortenTestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			postRequest := httptest.NewRequest(http.MethodPost, *config.OriginURL, strings.NewReader(tc.fullURL))
 			w := httptest.NewRecorder()
@@ -69,6 +79,44 @@ func TestShortage(t *testing.T) {
 	}
 }
 
+func TestShortageJSON(t *testing.T) {
+	for _, tc := range shortenTestCases {
+		t.Run(tc.name, func(t *testing.T) {
+			responseData := PostRequestData{URL: tc.fullURL}
+			jsonBody, _ := json.Marshal(responseData)
+
+			postRequest := httptest.NewRequest(http.MethodPost, *config.OriginURL, bytes.NewReader(jsonBody))
+			w := httptest.NewRecorder()
+			postHandler := http.HandlerFunc(postPageJSON)
+			postHandler(w, postRequest)
+			result := w.Result()
+
+			assert.Equal(t, http.StatusCreated, result.StatusCode)
+
+			bodyBytes, err := io.ReadAll(result.Body)
+			require.NoError(t, err)
+			err = result.Body.Close()
+			require.NoError(t, err)
+			var r PostResponseData
+			err = json.Unmarshal(bodyBytes, &r)
+			require.NoError(t, err)
+
+			assert.Equal(t, *config.ResultURL+"/"+tc.shortURL, r.Result)
+
+			idRequest := httptest.NewRequest(http.MethodGet, *config.OriginURL, nil)
+			idRequest.SetPathValue("id", tc.shortURL)
+			ww := httptest.NewRecorder()
+			getHandler := http.HandlerFunc(getPage)
+			getHandler(ww, idRequest)
+			idResult := ww.Result()
+			defer idResult.Body.Close()
+
+			assert.Equal(t, tc.fullURL, idResult.Header.Get("Location"))
+			assert.Equal(t, http.StatusTemporaryRedirect, idResult.StatusCode)
+		})
+	}
+}
+
 func TestPostHandlerMethods(t *testing.T) {
 	testCases := []struct {
 		method       string
@@ -81,15 +129,17 @@ func TestPostHandlerMethods(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.method, func(t *testing.T) {
-			request := httptest.NewRequest(tc.method, "/", strings.NewReader("https://github.com/demurk/tinyurl"))
-			w := httptest.NewRecorder()
+		for _, URL := range []string{"/", "/api/shorten"} {
+			t.Run(tc.method, func(t *testing.T) {
+				request := httptest.NewRequest(tc.method, URL, strings.NewReader("https://github.com/demurk/tinyurl"))
+				w := httptest.NewRecorder()
 
-			postHandler := http.HandlerFunc(postPage)
-			postHandler(w, request)
+				postHandler := http.HandlerFunc(postPage)
+				postHandler(w, request)
 
-			assert.Equal(t, tc.expectedCode, w.Code, "Invalid status code")
-		})
+				assert.Equal(t, tc.expectedCode, w.Code, "Invalid status code")
+			})
+		}
 	}
 }
 

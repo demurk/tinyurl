@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	OriginURL *string
-	ResultURL *string
+	OriginURL       *string
+	ResultURL       *string
+	FileStoragePath *string
 )
 
 func Parse() {
@@ -21,6 +22,12 @@ func Parse() {
 	resultURLEnv, exists := os.LookupEnv("BASE_URL")
 	if exists {
 		ResultURL = &resultURLEnv
+	}
+
+	FileStoragePath = flag.String("f", "./urls_storage.jsonl", "Urls storage file path (JSONL format)")
+	fileStoragePathEnv, exists := os.LookupEnv("FILE_STORAGE_PATH")
+	if exists {
+		FileStoragePath = &fileStoragePathEnv
 	}
 
 	flag.Parse()

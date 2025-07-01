@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"errors"
@@ -31,16 +31,20 @@ func (sm *SafeRepository) Get(key string) (string, bool) {
 
 var urlsStorage = NewSafeRepository()
 
-func getFullURL(shortURL string) (string, error) {
+func mGetFullURL(shortURL string) (string, error) {
 	fullURL, exists := urlsStorage.Get(shortURL)
 	if !exists {
-		return "", errors.New("url doesnt exists")
+		return "", errors.New("URL doesnt exists")
 	}
 	return fullURL, nil
 }
 
-func setFullURL(fullURL string) string {
+func mSetFullURL(fullURL string) (string, error) {
 	shortURL := makeShortURL(fullURL)
 	urlsStorage.Set(shortURL, fullURL)
-	return shortURL
+	return shortURL, nil
+}
+
+func mSetShortFullURL(shortURL string, fullURL string) {
+	urlsStorage.Set(shortURL, fullURL)
 }

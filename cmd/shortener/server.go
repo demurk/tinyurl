@@ -3,22 +3,39 @@ package main
 import (
 	"net/http"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
-	"github.com/go-chi/chi/middleware"
+	"github.com/demurk/tinyurl/internal/app/middleware/compression"
+	"github.com/demurk/tinyurl/internal/app/middleware/logger"
+	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/storage"
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 func main() {
 	config.Parse()
+
+	zapLogger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+	defer zapLogger.Sync()
+
+	storage.Initialize()
+
 	r := chi.NewRouter()
+
+	r.Use(logger.ZapLogger(zapLogger))
+	r.Use(compression.GZIP)
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
 	})
-	r.Use(middleware.Logger)
+
 	r.Post("/", postPage)
 	r.Get("/{id}", getPage)
 
-	err := http.ListenAndServe(*config.OriginURL, r)
+	r.Post("/api/shorten", postPageJSON)
+
+	err = http.ListenAndServe(*config.OriginURL, r)
 	if err != nil {
 		panic(err)
 	}
