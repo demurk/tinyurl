@@ -1,4 +1,4 @@
-package urls_storage
+package storage
 
 import (
 	"errors"
