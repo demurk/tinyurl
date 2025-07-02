@@ -1,8 +1,6 @@
 package main
 
-import (
-	"net/url"
-)
+import "net/url"
 
 func IsValidURL(urlString string) bool {
 	u, err := url.Parse(urlString)
