@@ -88,3 +88,16 @@ func dbSetFullURLBatch(urlSlice []types.BatchJSONPostRequestData) ([]types.Batch
 	err = tx.Commit()
 	return returnValues, err
 }
+
+func CreateTables() {
+	conn := db.GetConnection()
+	conn.Exec(`
+		CREATE TABLE IF NOT EXISTS public.urls (
+			id serial4 NOT NULL,
+			full_url text NOT NULL,
+			short_url varchar NOT NULL,
+			CONSTRAINT urls_pk PRIMARY KEY (id),
+			CONSTRAINT urls_un UNIQUE (full_url)
+		);
+	`)
+}

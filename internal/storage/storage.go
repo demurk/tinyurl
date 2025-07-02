@@ -17,18 +17,19 @@ var storage StorageStruct
 func Initialize() {
 	conn := db.GetConnection()
 	if conn != nil && conn.Ping() == nil {
+		CreateTables()
 		storage = StorageStruct{
 			Get:      dbGetFullURL,
 			Set:      dbSetFullURL,
 			SetBatch: dbSetFullURLBatch,
 		}
 	} else if *config.FileStoragePath != "" {
+		RestoreURLsFromFile()
 		storage = StorageStruct{
 			Get:      mGetFullURL,
 			Set:      dSetFullURL,
 			SetBatch: dSetFullURLBatch,
 		}
-		RestoreURLsFromFile()
 	} else {
 		storage = StorageStruct{
 			Get:      mGetFullURL,
