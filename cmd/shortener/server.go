@@ -8,7 +8,7 @@ import (
 	"github.com/demurk/tinyurl/internal/config"
 	"github.com/demurk/tinyurl/internal/db"
 	"github.com/demurk/tinyurl/internal/logger"
-	"github.com/demurk/tinyurl/internal/urls_storage"
+	"github.com/demurk/tinyurl/internal/storage"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -23,7 +23,7 @@ func main() {
 	conn := db.GetConnection()
 	defer conn.Close()
 
-	urls_storage.New()
+	storage.Initialize()
 
 	r := chi.NewRouter()
 
@@ -33,11 +33,12 @@ func main() {
 		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
 	})
 
-	r.Post("/", postPage)
-	r.Get("/{id}", getPage)
-	r.Get("/ping", pingPage)
+	r.Post("/", saveTextURLHandler)
+	r.Get("/{id}", getFullURLHandler)
+	r.Get("/ping", pingDBPage)
 
-	r.Post("/api/shorten", postPageJSON)
+	r.Post("/api/shorten", saveJSONURLHandler)
+	r.Post("/api/shorten/batch", saveBatchJSONURLsPage)
 
 	err := http.ListenAndServe(*config.OriginURL, r)
 	if err != nil {

@@ -5,18 +5,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/demurk/tinyurl/internal/config"
-	"github.com/demurk/tinyurl/internal/urls_storage"
+	"github.com/demurk/tinyurl/internal/storage"
+	"github.com/demurk/tinyurl/internal/types"
 )
 
-type PostRequestData struct {
-	URL string `json:"url"`
-}
-type PostResponseData struct {
-	Result string `json:"result"`
-}
-
-func postPageJSON(res http.ResponseWriter, req *http.Request) {
+func saveJSONURLHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(res, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
 		return
@@ -28,23 +21,66 @@ func postPageJSON(res http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	var r PostRequestData
+	var r types.JSONPostRequestData
 	err = json.Unmarshal(reqBytes, &r)
 	if err != nil {
 		http.Error(res, "Couldn't parse request json", http.StatusInternalServerError)
 		return
 	}
 
-	storage := urls_storage.Get()
-	var shortURLId string
-	shortURLId, err = storage.Set(r.URL)
+	if !IsValidURL(r.URL) {
+		http.Error(res, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	urlStorage := storage.Get()
+	var shortURL string
+	shortURL, err = urlStorage.Set(r.URL)
 	if err != nil {
 		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
 		return
 	}
 
-	responseData := PostResponseData{Result: *config.ResultURL + "/" + shortURLId}
+	responseData := types.JSONPostResponseData{Result: storage.ShortURLWithHost(shortURL)}
 	jsonResponse, err := json.Marshal(responseData)
+	if err != nil {
+		http.Error(res, "Error marshaling response JSON", http.StatusInternalServerError)
+		return
+	}
+
+	res.Header().Set("content-type", "application/json")
+	res.WriteHeader(http.StatusCreated)
+	res.Write(jsonResponse)
+}
+
+func saveBatchJSONURLsPage(res http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(res, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
+		return
+	}
+	reqBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		http.Error(res, "Couldn't read request body", http.StatusInternalServerError)
+		return
+	}
+	defer req.Body.Close()
+
+	var r []types.BatchJSONPostRequestData
+	err = json.Unmarshal(reqBytes, &r)
+	if err != nil {
+		http.Error(res, "Couldn't parse request json", http.StatusInternalServerError)
+		return
+	}
+
+	storage := storage.Get()
+	var result []types.BatchJSONPostResponseData
+	result, err = storage.SetBatch(r)
+	if err != nil {
+		http.Error(res, "Error storing data", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse, err := json.Marshal(result)
 	if err != nil {
 		http.Error(res, "Error marshaling response JSON", http.StatusInternalServerError)
 		return

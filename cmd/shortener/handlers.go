@@ -4,12 +4,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/demurk/tinyurl/internal/config"
 	"github.com/demurk/tinyurl/internal/db"
-	"github.com/demurk/tinyurl/internal/urls_storage"
+	"github.com/demurk/tinyurl/internal/storage"
 )
 
-func postPage(res http.ResponseWriter, req *http.Request) {
+func saveTextURLHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(res, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
 		return
@@ -27,9 +26,9 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	storage := urls_storage.Get()
-	var shortURLId string
-	shortURLId, err = storage.Set(string(fullURLBytes))
+	urlStorage := storage.Get()
+	var shortURL string
+	shortURL, err = urlStorage.Set(fullURL)
 	if err != nil {
 		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
 		return
@@ -37,21 +36,21 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte(*config.ResultURL + "/" + shortURLId))
+	res.Write([]byte(storage.ShortURLWithHost(shortURL)))
 }
 
-func getPage(res http.ResponseWriter, req *http.Request) {
+func getFullURLHandler(res http.ResponseWriter, req *http.Request) {
 	shortURL := req.PathValue("id")
-	storage := urls_storage.Get()
-	fullURL, err := storage.Get(shortURL)
+	urlStorage := storage.Get()
+	fullURL, err := urlStorage.Get(shortURL)
 	if err != nil {
-		http.Error(res, "Url doesnt exists", http.StatusNotFound)
+		http.Error(res, err.Error(), http.StatusNotFound)
 		return
 	}
 	http.Redirect(res, req, fullURL, http.StatusTemporaryRedirect)
 }
 
-func pingPage(res http.ResponseWriter, req *http.Request) {
+func pingDBPage(res http.ResponseWriter, req *http.Request) {
 	err := db.GetConnection().Ping()
 
 	if err != nil {

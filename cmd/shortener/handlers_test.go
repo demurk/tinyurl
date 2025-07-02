@@ -11,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/storage"
+	"github.com/demurk/tinyurl/internal/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -40,6 +42,8 @@ var shortenTestCases = []struct {
 
 func TestMain(m *testing.M) {
 	config.Parse()
+	os.Truncate(*config.FileStoragePath, 0)
+	storage.Initialize()
 	os.Exit(m.Run())
 }
 
@@ -48,7 +52,7 @@ func TestShortage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			postRequest := httptest.NewRequest(http.MethodPost, *config.OriginURL, strings.NewReader(tc.fullURL))
 			w := httptest.NewRecorder()
-			postHandler := http.HandlerFunc(postPage)
+			postHandler := http.HandlerFunc(saveTextURLHandler)
 			postHandler(w, postRequest)
 			result := w.Result()
 
@@ -65,7 +69,7 @@ func TestShortage(t *testing.T) {
 			idRequest := httptest.NewRequest(http.MethodGet, *config.OriginURL, nil)
 			idRequest.SetPathValue("id", tc.shortURL)
 			ww := httptest.NewRecorder()
-			getHandler := http.HandlerFunc(getPage)
+			getHandler := http.HandlerFunc(getFullURLHandler)
 			getHandler(ww, idRequest)
 			idResult := ww.Result()
 			defer idResult.Body.Close()
@@ -79,12 +83,12 @@ func TestShortage(t *testing.T) {
 func TestShortageJSON(t *testing.T) {
 	for _, tc := range shortenTestCases {
 		t.Run(tc.name, func(t *testing.T) {
-			responseData := PostRequestData{URL: tc.fullURL}
+			responseData := types.JSONPostRequestData{URL: tc.fullURL}
 			jsonBody, _ := json.Marshal(responseData)
 
 			postRequest := httptest.NewRequest(http.MethodPost, *config.OriginURL, bytes.NewReader(jsonBody))
 			w := httptest.NewRecorder()
-			postHandler := http.HandlerFunc(postPageJSON)
+			postHandler := http.HandlerFunc(saveJSONURLHandler)
 			postHandler(w, postRequest)
 			result := w.Result()
 
@@ -94,7 +98,7 @@ func TestShortageJSON(t *testing.T) {
 			require.NoError(t, err)
 			err = result.Body.Close()
 			require.NoError(t, err)
-			var r PostResponseData
+			var r types.JSONPostResponseData
 			err = json.Unmarshal(bodyBytes, &r)
 			require.NoError(t, err)
 
@@ -103,7 +107,7 @@ func TestShortageJSON(t *testing.T) {
 			idRequest := httptest.NewRequest(http.MethodGet, *config.OriginURL, nil)
 			idRequest.SetPathValue("id", tc.shortURL)
 			ww := httptest.NewRecorder()
-			getHandler := http.HandlerFunc(getPage)
+			getHandler := http.HandlerFunc(getFullURLHandler)
 			getHandler(ww, idRequest)
 			idResult := ww.Result()
 			defer idResult.Body.Close()
@@ -131,7 +135,7 @@ func TestPostHandlerMethods(t *testing.T) {
 				request := httptest.NewRequest(tc.method, URL, strings.NewReader("https://github.com/demurk/tinyurl"))
 				w := httptest.NewRecorder()
 
-				postHandler := http.HandlerFunc(postPage)
+				postHandler := http.HandlerFunc(saveTextURLHandler)
 				postHandler(w, request)
 
 				assert.Equal(t, tc.expectedCode, w.Code, "Invalid status code")
@@ -144,7 +148,7 @@ func TestInvalidURL(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("not an url"))
 	w := httptest.NewRecorder()
 
-	postHandler := http.HandlerFunc(postPage)
+	postHandler := http.HandlerFunc(saveTextURLHandler)
 	postHandler(w, request)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code, "Invalid URL")
@@ -155,7 +159,7 @@ func TestGetHandler(t *testing.T) {
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
 		w := httptest.NewRecorder()
 
-		getHandler := http.HandlerFunc(getPage)
+		getHandler := http.HandlerFunc(getFullURLHandler)
 		getHandler(w, request)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)

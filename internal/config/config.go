@@ -9,6 +9,7 @@ var (
 	OriginURL       *string
 	ResultURL       *string
 	DBConnectionURL *string
+	FileStoragePath *string
 )
 
 func Parse() {
@@ -28,6 +29,12 @@ func Parse() {
 	dbConnectionURLEnv, exists := os.LookupEnv("DATABASE_DSN")
 	if exists {
 		DBConnectionURL = &dbConnectionURLEnv
+	}
+
+	FileStoragePath = flag.String("f", "./urls_storage.jsonl", "Urls storage file path (JSONL format)")
+	fileStoragePathEnv, exists := os.LookupEnv("FILE_STORAGE_PATH")
+	if exists {
+		FileStoragePath = &fileStoragePathEnv
 	}
 
 	flag.Parse()
