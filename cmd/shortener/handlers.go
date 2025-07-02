@@ -6,6 +6,7 @@ import (
 
 	"github.com/demurk/tinyurl/internal/config"
 	"github.com/demurk/tinyurl/internal/db"
+	"github.com/demurk/tinyurl/internal/urls_storage"
 )
 
 func postPage(res http.ResponseWriter, req *http.Request) {
@@ -19,7 +20,21 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer req.Body.Close()
-	shortURLId := setFullURL(string(fullURLBytes))
+
+	fullURL := string(fullURLBytes)
+	if !IsValidURL(fullURL) {
+		http.Error(res, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	storage := urls_storage.Get()
+	var shortURLId string
+	shortURLId, err = storage.Set(string(fullURLBytes))
+	if err != nil {
+		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
+		return
+	}
+
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
 	res.Write([]byte(*config.ResultURL + "/" + shortURLId))
@@ -27,7 +42,8 @@ func postPage(res http.ResponseWriter, req *http.Request) {
 
 func getPage(res http.ResponseWriter, req *http.Request) {
 	shortURL := req.PathValue("id")
-	fullURL, err := getFullURL(shortURL)
+	storage := urls_storage.Get()
+	fullURL, err := storage.Get(shortURL)
 	if err != nil {
 		http.Error(res, "Url doesnt exists", http.StatusNotFound)
 		return

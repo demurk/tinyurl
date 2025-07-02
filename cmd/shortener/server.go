@@ -8,6 +8,7 @@ import (
 	"github.com/demurk/tinyurl/internal/config"
 	"github.com/demurk/tinyurl/internal/db"
 	"github.com/demurk/tinyurl/internal/logger"
+	"github.com/demurk/tinyurl/internal/urls_storage"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -21,6 +22,8 @@ func main() {
 	db.Connect()
 	conn := db.GetConnection()
 	defer conn.Close()
+
+	urls_storage.New()
 
 	r := chi.NewRouter()
 
