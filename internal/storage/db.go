@@ -45,6 +45,7 @@ func dbSetFullURL(fullURL string) (string, error) {
 		return "", err
 	}
 
+	urlsStorage.Set(shortURL, fullURL)
 	return shortURL, nil
 }
 
