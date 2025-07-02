@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io"
 	"net/http"
 
@@ -26,16 +27,21 @@ func saveTextURLHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	res.Header().Set("content-type", "text/plain")
+
 	urlStorage := storage.Get()
 	var shortURL string
 	shortURL, err = urlStorage.Set(fullURL)
 	if err != nil {
-		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
-		return
+		if errors.Is(err, storage.ErrURLAlreadyExists) {
+			res.WriteHeader(http.StatusConflict)
+		} else {
+			http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		res.WriteHeader(http.StatusCreated)
 	}
-
-	res.Header().Set("content-type", "text/plain")
-	res.WriteHeader(http.StatusCreated)
 	res.Write([]byte(storage.ShortURLWithHost(shortURL)))
 }
 

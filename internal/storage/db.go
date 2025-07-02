@@ -8,6 +8,7 @@ import (
 
 	"github.com/demurk/tinyurl/internal/db"
 	"github.com/demurk/tinyurl/internal/types"
+	"github.com/lib/pq"
 )
 
 type User struct {
@@ -33,14 +34,17 @@ func dbSetFullURL(fullURL string) (string, error) {
 	shortURL := makeShortURL(fullURL)
 	_, err := conn.Exec(`
 		INSERT INTO urls (short_url, full_url) 
-		VALUES ($1, $2)
-		ON CONFLICT DO NOTHING;`,
-		shortURL, fullURL,
+		VALUES ($1, $2);
+		`, shortURL, fullURL,
 	)
 
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return shortURL, ErrURLAlreadyExists
+		}
 		return "", err
 	}
+
 	urlsStorage.Set(shortURL, fullURL)
 	return shortURL, nil
 }
