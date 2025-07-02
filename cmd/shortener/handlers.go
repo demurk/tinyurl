@@ -27,6 +27,8 @@ func saveTextURLHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	res.Header().Set("content-type", "text/plain")
+
 	urlStorage := storage.Get()
 	var shortURL string
 	shortURL, err = urlStorage.Set(fullURL)
@@ -40,7 +42,6 @@ func saveTextURLHandler(res http.ResponseWriter, req *http.Request) {
 	} else {
 		res.WriteHeader(http.StatusCreated)
 	}
-	res.Header().Set("content-type", "text/plain")
 	res.Write([]byte(storage.ShortURLWithHost(shortURL)))
 }
 

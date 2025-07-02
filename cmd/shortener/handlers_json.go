@@ -34,6 +34,8 @@ func saveJSONURLHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	res.Header().Set("content-type", "application/json")
+
 	urlStorage := storage.Get()
 	var shortURL string
 	shortURL, err = urlStorage.Set(r.URL)
@@ -54,9 +56,6 @@ func saveJSONURLHandler(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Error marshaling response JSON", http.StatusInternalServerError)
 		return
 	}
-
-	res.Header().Set("content-type", "application/json")
-	res.WriteHeader(http.StatusCreated)
 	res.Write(jsonResponse)
 }
 
