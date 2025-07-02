@@ -4,7 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/demurk/tinyurl/cmd/shortener/config"
+	"github.com/demurk/tinyurl/internal/config"
+	"github.com/demurk/tinyurl/internal/db"
 )
 
 func postPage(res http.ResponseWriter, req *http.Request) {
@@ -32,4 +33,13 @@ func getPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	http.Redirect(res, req, fullURL, http.StatusTemporaryRedirect)
+}
+
+func pingPage(res http.ResponseWriter, req *http.Request) {
+	err := db.GetConnection().Ping()
+
+	if err != nil {
+		http.Error(res, "", http.StatusInternalServerError)
+		return
+	}
 }

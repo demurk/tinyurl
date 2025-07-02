@@ -1,4 +1,4 @@
-package logger
+package middlewarelogger
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func ZapLogger(logger *zap.Logger) func(next http.Handler) http.Handler {
+func ConnectZapLogger(logger *zap.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rw := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
