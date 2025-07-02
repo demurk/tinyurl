@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
@@ -37,8 +38,14 @@ func saveJSONURLHandler(res http.ResponseWriter, req *http.Request) {
 	var shortURL string
 	shortURL, err = urlStorage.Set(r.URL)
 	if err != nil {
-		http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
-		return
+		if errors.Is(err, storage.ErrURLAlreadyExists) {
+			res.WriteHeader(http.StatusConflict)
+		} else {
+			http.Error(res, "Couldn't store url, try again", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		res.WriteHeader(http.StatusCreated)
 	}
 
 	responseData := types.JSONPostResponseData{Result: storage.ShortURLWithHost(shortURL)}
